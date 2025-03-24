@@ -44,7 +44,7 @@ bool Inited = false;
 extern DebugReport DebugListener;
 
 uint16_t sm_debugger_port = 27050;
-float sm_debugger_delay = 1.f;
+float sm_debugger_delay = 0.f;
 int SM_Debugger_port()
 {
 	return sm_debugger_port;
