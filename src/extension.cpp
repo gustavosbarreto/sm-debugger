@@ -43,8 +43,8 @@ bool Inited = false;
 
 extern DebugReport DebugListener;
 
-uint16_t sm_debugger_port = 27015;
-float sm_debugger_delay = 0.f;
+uint16_t sm_debugger_port = 27050;
+float sm_debugger_delay = 1.f;
 int SM_Debugger_port()
 {
 	return sm_debugger_port;
@@ -101,7 +101,7 @@ bool Extension::SDK_OnLoad(char *error, size_t maxlen, bool late) {
 	else
 	{
 
-		fmt::print("[SM_DEBUGGER] DebuggerPort is not exists in core.cfg. Setting default port 12345.\n");
+		fmt::print("[SM_DEBUGGER] DebuggerPort is not exists in core.cfg. Setting default port 27050.\n");
 	}
 	if (debugDelay && debugDelay[0])
 	{
