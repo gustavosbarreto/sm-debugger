@@ -22,13 +22,6 @@ jobs:
           sudo apt-get --assume-yes install curl zip unzip tar pkg-config gcc-11-multilib g++-11-multilib ninja-build cmake
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 10
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 10
-          sudo dpkg --add-architecture i386
-          sudo apt-get install -y --no-install-recommends \
-            gcc-multilib g++-multilib libstdc++6 lib32stdc++6 \
-            libc6-dev libc6-dev-i386 linux-libc-dev \
-            linux-libc-dev:i386 clang
-          echo "CC=clang" >> $GITHUB_ENV
-          echo "CXX=clang++" >> $GITHUB_ENV
 
       - name: Install vcpkg packets
         working-directory: ${{github.workspace}}
@@ -37,42 +30,10 @@ jobs:
           ./dep/vcpkg/bootstrap-vcpkg.sh -musl
           ./dep/vcpkg/vcpkg install --triplet x86-linux-sm --debug
 
-      - name: Getting SourceMod
-        uses: actions/checkout@v4
-        with:
-          repository: alliedmodders/sourcemod
-          path: sourcemod
-          submodules: recursive
-
-      - name: Switch to debug symbol sourcepawn branch
-        run: |
-          cd sourcemod/sourcepawn
-          git remote add peace https://github.com/peace-maker/sourcepawn.git
-          git fetch peace
-          git switch debug_api_symbols
-          git submodule update --init --recursive
-
-      - name: Getting ambuild
-        run: |
-          python -m pip install wheel
-          pip install git+https://github.com/alliedmodders/ambuild
-
-      - name: Compiling SourcePawn VM
-        working-directory: sourcemod/sourcepawn
-        shell: bash
-        run: |
-          python configure.py --enable-optimize --targets x86,x86_64
-          ambuild objdir
-          mkdir -p "${{ github.workspace }}/sp-console-debugger/objdir/package/addons/sourcemod/bin/x64"
-          if [ -f objdir/libsourcepawn/linux-x86/libsourcepawn.so ]; then
-            cp objdir/libsourcepawn/linux-x86/libsourcepawn.so "${{ github.workspace }}/sp-console-debugger/objdir/package/addons/sourcemod/bin/sourcepawn.jit.x86.so"
-            cp objdir/libsourcepawn/linux-x86_64/libsourcepawn.so "${{ github.workspace }}/sp-console-debugger/objdir/package/addons/sourcemod/bin/x64/sourcepawn.vm.so"
-          else
-            cp objdir/libsourcepawn/windows-x86/libsourcepawn.dll "${{ github.workspace }}/sp-console-debugger/objdir/package/addons/sourcemod/bin/sourcepawn.jit.x86.dll"
-            cp objdir/libsourcepawn/windows-x86_64/libsourcepawn.dll "${{ github.workspace }}/sp-console-debugger/objdir/package/addons/sourcemod/bin/x64/sourcepawn.vm.dll"
-          fi
-
       - name: Configure CMake
+        # Note the current convention is to use the -S and -B options here to specify source
+        # and build directories, but this is only available with CMake 3.13 and higher.
+        # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
         run: |
           rm -rf build
           cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE="./dep/vcpkg/scripts/buildsystems/vcpkg.cmake"  -DVCPKG_TARGET_TRIPLET=x86-linux-sm  -DCMAKE_CXX_FLAGS_INIT="-m32" -DCMAKE_C_FLAGS_INIT="-m32"
@@ -108,42 +69,6 @@ jobs:
           .\dep\vcpkg\bootstrap-vcpkg.bat
           .\dep\vcpkg\vcpkg install --triplet x86-windows-static
 
-      - name: Getting SourceMod
-        uses: actions/checkout@v4
-        with:
-          repository: alliedmodders/sourcemod
-          path: sourcemod
-          submodules: recursive
-
-      - name: Switch to debug symbol sourcepawn branch
-        shell: bash
-        run: |
-          cd sourcemod/sourcepawn
-          git remote add peace https://github.com/peace-maker/sourcepawn.git
-          git fetch peace
-          git switch debug_api_symbols
-          git submodule update --init --recursive
-
-      - name: Getting ambuild
-        run: |
-          python -m pip install wheel
-          pip install git+https://github.com/alliedmodders/ambuild
-
-      - name: Compiling SourcePawn VM
-        working-directory: sourcemod/sourcepawn
-        shell: bash
-        run: |
-          python configure.py --enable-optimize --targets x86,x86_64
-          ambuild objdir
-          mkdir -p "${{ github.workspace }}/sp-console-debugger/objdir/package/addons/sourcemod/bin/x64"
-          if [ -f objdir/libsourcepawn/linux-x86/libsourcepawn.so ]; then
-            cp objdir/libsourcepawn/linux-x86/libsourcepawn.so "${{ github.workspace }}/sp-console-debugger/objdir/package/addons/sourcemod/bin/sourcepawn.jit.x86.so"
-            cp objdir/libsourcepawn/linux-x86_64/libsourcepawn.so "${{ github.workspace }}/sp-console-debugger/objdir/package/addons/sourcemod/bin/x64/sourcepawn.vm.so"
-          else
-            cp objdir/libsourcepawn/windows-x86/libsourcepawn.dll "${{ github.workspace }}/sp-console-debugger/objdir/package/addons/sourcemod/bin/sourcepawn.jit.x86.dll"
-            cp objdir/libsourcepawn/windows-x86_64/libsourcepawn.dll "${{ github.workspace }}/sp-console-debugger/objdir/package/addons/sourcemod/bin/x64/sourcepawn.vm.dll"
-          fi
-
       - name: Configure CMake
         working-directory: ${{github.workspace}}
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="./dep/vcpkg/scripts/buildsystems/vcpkg.cmake"  -DVCPKG_TARGET_TRIPLET=x86-windows-static
@@ -159,7 +84,6 @@ jobs:
         with:
           name: windows
           path: ${{github.workspace}}/build/sm_debugger.ext.dll
-
   publish:
     name: Publish
     runs-on: ubuntu-latest
