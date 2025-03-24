@@ -2,12 +2,6 @@ name: Build
 
 on:
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to build'
-        required: true
-        default: ${{ github.ref_name }}
-        type: string
   pull_request:
 
 jobs:
@@ -19,7 +13,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-          ref: ${{ github.event.inputs.branch || github.ref }}
 
       - name: Install dep packets
         working-directory: ${{github.workspace}}
@@ -100,7 +93,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-          ref: ${{ github.event.inputs.branch || github.ref }}
 
       - name: Install ninja
         run: choco install ninja
