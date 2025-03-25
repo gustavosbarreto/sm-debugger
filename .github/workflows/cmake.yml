@@ -113,13 +113,20 @@ jobs:
         run: |
             if [ -f vcpkg.json ]; then
               VCPKG_COMMIT=$(git -C dep/vcpkg rev-parse HEAD)
-              jq --arg baseline "$VCPKG_COMMIT" \
-                'if .builtin-baseline? then 
-                   .builtin-baseline = $baseline 
-                 else 
-                   . + {"builtin-baseline": $baseline} 
-                 end' vcpkg.json > vcpkg.json.tmp
-              mv vcpkg.json.tmp vcpkg.json
+              if [[ "$RUNNER_OS" == "Windows" ]]; then
+                powershell -Command "\
+                  \$json = Get-Content vcpkg.json | ConvertFrom-Json; \
+                  \$json | Add-Member -NotePropertyName 'builtin-baseline' -NotePropertyValue '$VCPKG_COMMIT' -Force; \
+                  \$json | ConvertTo-Json | Set-Content vcpkg.json"
+              else
+                jq --arg baseline "$VCPKG_COMMIT" \
+                  'if .builtin-baseline? then 
+                     .builtin-baseline = $baseline 
+                   else 
+                     . + {"builtin-baseline": $baseline} 
+                   end' vcpkg.json > vcpkg.json.tmp
+                mv vcpkg.json.tmp vcpkg.json
+              fi
               cat vcpkg.json
             fi
 
