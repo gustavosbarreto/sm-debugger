@@ -101,24 +101,24 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           choco install ninja
-          
+
       - name: Setup MSVC
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x86
 
-
       - name: Install vcpkg
         working-directory: ${{github.workspace}}
+        shell: bash
         run: |
           if [ "${{ runner.os }}" == "Linux" ]; then
             cp cmake/x86-linux-sm.cmake dep/vcpkg/triplets/x86-linux-sm.cmake
             ./dep/vcpkg/bootstrap-vcpkg.sh -musl
             ./dep/vcpkg/vcpkg install --triplet x86-linux-sm --debug
           else
-            .\dep\vcpkg\bootstrap-vcpkg.bat
-            .\dep\vcpkg\vcpkg install --triplet x86-windows-static
+            ./dep/vcpkg/bootstrap-vcpkg.bat
+            ./dep/vcpkg/vcpkg install --triplet x86-windows-static
           fi
 
       - name: Configure CMake (Linux)
@@ -177,17 +177,17 @@ jobs:
       - name: Archive artifacts
         run: |
           mkdir -p addons/sourcemod/extensions
-          
+
           # Copy debugger extensions
           cp artifacts/sm_debugger-*/* addons/sourcemod/extensions/
-          
+
           # Copy SourcePawn binaries for both platforms
           cp -r sourcepawn-artifacts/sourcepawn-ubuntu-22.04/addons/sourcemod/bin/* addons/sourcemod/bin/
           cp -r sourcepawn-artifacts/sourcepawn-windows-latest/addons/sourcemod/bin/* addons/sourcemod/bin/
-          
+
           # Create autoload file
           touch addons/sourcemod/extensions/sm_debugger.autoload
-          
+
           # Create zip archive
           7z a -tzip sm_debugger-bin-${RELEASE_VERSION}.zip addons
 
