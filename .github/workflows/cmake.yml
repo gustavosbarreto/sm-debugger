@@ -119,13 +119,8 @@ jobs:
                   \$json | Add-Member -NotePropertyName 'builtin-baseline' -NotePropertyValue '$VCPKG_COMMIT' -Force; \
                   \$json | ConvertTo-Json | Set-Content vcpkg.json"
               else
-                jq --arg baseline "$VCPKG_COMMIT" \
-                  'if .builtin-baseline? then 
-                     .builtin-baseline = $baseline 
-                   else 
-                     . + {"builtin-baseline": $baseline} 
-                   end' vcpkg.json > vcpkg.json.tmp
-                mv vcpkg.json.tmp vcpkg.json
+                # Simpler approach for Linux/macOS
+                sed -i "s/\"builtin-baseline\":[^,}]*/\"builtin-baseline\": \"$VCPKG_COMMIT\"/" vcpkg.json
               fi
               cat vcpkg.json
             fi
