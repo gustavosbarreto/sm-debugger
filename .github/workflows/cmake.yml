@@ -108,6 +108,17 @@ jobs:
         with:
           arch: x86
 
+      - name: Update vcpkg Baseline
+        shell: bash
+        run: |
+            if [ -f vcpkg.json ]; then
+              VCPKG_COMMIT=$(git -C dep/vcpkg rev-parse HEAD)
+              jq --arg baseline "$VCPKG_COMMIT" \
+                '.builtin-baseline = $baseline' vcpkg.json > vcpkg.json.tmp
+              mv vcpkg.json.tmp vcpkg.json
+              cat vcpkg.json
+            fi
+
       - name: Install vcpkg
         working-directory: ${{github.workspace}}
         shell: bash
