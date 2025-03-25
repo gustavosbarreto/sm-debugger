@@ -1,7 +1,6 @@
 {
   "name": "sourcepawn-debugger",
   "version-string": "0.1.0",
-  "builtin-baseline": "2024-03-25",
   "dependencies": [
     "nlohmann-json",
     "fmt",

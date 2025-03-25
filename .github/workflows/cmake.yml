@@ -117,7 +117,7 @@ jobs:
             ./dep/vcpkg/bootstrap-vcpkg.sh -musl
             ./dep/vcpkg/vcpkg install --triplet x86-linux-sm --debug
           else
-            ./dep/vcpkg/bootstrap-vcpkg.bat
+            ./dep/vcpkg/bootstrap-vcpkg.bat -disableMetrics
             ./dep/vcpkg/vcpkg install --triplet x86-windows-static
           fi
 
