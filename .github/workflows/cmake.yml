@@ -1,20 +1,15 @@
 name: Build SourcePawn and SourceMod Debugger
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
   workflow_dispatch:
-  # Uncomment the line below if you want to trigger on tags
-  # tags:
-  #   - 'v*'
 
 jobs:
   build_sourcepawn:
     name: Build SourcePawn
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-22.04
@@ -48,11 +43,6 @@ jobs:
           git switch debug_api_symbols
           git submodule update --init --recursive
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
       - name: Install dependencies
         run: |
           python -m pip install wheel
@@ -85,6 +75,7 @@ jobs:
   build_sm_debugger:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-latest
@@ -117,10 +108,6 @@ jobs:
         with:
           arch: x86
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
 
       - name: Install vcpkg
         working-directory: ${{github.workspace}}
