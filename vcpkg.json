@@ -7,5 +7,5 @@
     "brynet",
     "zlib"
   ],
-  "builtin-baseline": "latest"
+  "builtin-baseline": "21816e0df975ab3ba13ab75263c4deeb080ef681"
 }

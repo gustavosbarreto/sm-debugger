@@ -34,7 +34,6 @@ find_package(ZLIB REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_path(BRYNET_INCLUDE_DIRS "brynet/Version.hpp")
 
-
 set(CPP_FILES 
 "src/sourcepawn/vm/smx-v1-image.cpp"
 "src/sourcepawn/vm/file-utils.cpp"
