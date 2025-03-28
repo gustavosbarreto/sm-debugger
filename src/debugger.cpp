@@ -18,23 +18,14 @@
 #include <filesystem>
 #include <fmt/printf.h>
 
-#include <brynet/net/EventLoop.hpp>
-#include <brynet/net/ListenThread.hpp>
-#include <brynet/net/PromiseReceive.hpp>
-#include <brynet/net/SocketLibFunction.hpp>
-#include <brynet/net/TcpService.hpp>
-#include <brynet/net/http/HttpFormat.hpp>
-#include <brynet/net/wrapper/ConnectionBuilder.hpp>
-#include <brynet/net/wrapper/ServiceBuilder.hpp>
+#include <cppserver/asio/service.h>
+#include <cppserver/asio/tcp_server.h>
+#include <cppserver/asio/tcp_session.h>
 
 #include "sourcepawn/include/sp_vm_types.h"
 #include <nlohmann/json.hpp>
 
 using namespace sp;
-using namespace brynet;
-using namespace brynet::net;
-using namespace brynet::net::http;
-
 //
 //  Lowercases string
 //
@@ -108,10 +99,49 @@ std::vector<std::string> split_string(const std::string& str,
 	return strings;
 }
 DebugReport DebugListener;
-void removeClientID(const TcpConnection::Ptr& session);
+// Forward declarations
+class DebuggerSession;
+typedef std::shared_ptr<DebuggerSession> DebuggerSessionPtr;
+
+// Forward declaration for callback access
+void OnSessionReceived(const DebuggerSessionPtr& session, const void* buffer, size_t size);
+void OnSessionDisconnected(const DebuggerSessionPtr& session);
+
+// Custom session class for debugger clients
+class DebuggerSession : public CppServer::Asio::TCPSession {
+public:
+    DebuggerSession(const std::shared_ptr<CppServer::Asio::TCPServer>& server)
+        : CppServer::Asio::TCPSession(server) {}
+
+    void onReceived(const void* buffer, size_t size) override {
+        OnSessionReceived(std::static_pointer_cast<DebuggerSession>(shared_from_this()), buffer, size);
+    }
+
+    void onDisconnected() override {
+        OnSessionDisconnected(std::static_pointer_cast<DebuggerSession>(shared_from_this()));
+    }
+
+    bool SendBuffer(const void* buffer, size_t size) {
+        return SendAsync(buffer, size);
+    }
+};
+
+// Custom server class for creating debugger sessions
+class DebuggerServer : public CppServer::Asio::TCPServer {
+public:
+    DebuggerServer(const std::shared_ptr<CppServer::Asio::Service>& service, int port)
+        : CppServer::Asio::TCPServer(service, port) {}
+
+protected:
+    std::shared_ptr<CppServer::Asio::TCPSession> CreateSession(const std::shared_ptr<CppServer::Asio::TCPServer>& server) override {
+        return std::make_shared<DebuggerSession>(server);
+    }
+};
+
+void removeClientID(const DebuggerSessionPtr& session);
 class DebuggerClient {
 public:
-	TcpConnection::Ptr socket;
+	DebuggerSessionPtr socket;
 	std::unordered_set <std::string> files;
 	int DebugState = 0;
 
@@ -147,8 +177,8 @@ public:
 	std::map<std::string, std::shared_ptr<SmxV1Image>> images;
 	std::shared_ptr<SmxV1Image> current_image = nullptr;
 	SourcePawn::IFrameIterator* debug_iter;
-	DebuggerClient(const TcpConnection::Ptr& tcp_connection)
-		: socket(tcp_connection) {
+	DebuggerClient(const DebuggerSessionPtr& session)
+		: socket(session) {
 	}
 
 	~DebuggerClient() {
