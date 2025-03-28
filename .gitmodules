@@ -10,3 +10,7 @@
 [submodule "dep/hl2sdk"]
 	path = dep/hl2sdk
 	url = https://github.com/alliedmodders/hl2sdk
+
+[submodule "dep/cppserver"]
+	path = dep/cppserver
+	url = https://github.com/ViniciusRed/cppserver
