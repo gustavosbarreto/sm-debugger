@@ -18,9 +18,9 @@
 #include <filesystem>
 #include <fmt/printf.h>
 
-#include <cppserver/asio/service.h>
-#include <cppserver/asio/tcp_server.h>
-#include <cppserver/asio/tcp_session.h>
+#include <server/asio/service.h>
+#include <server/asio/tcp_server.h>
+#include <server/asio/tcp_session.h>
 
 #include "sourcepawn/include/sp_vm_types.h"
 #include <nlohmann/json.hpp>

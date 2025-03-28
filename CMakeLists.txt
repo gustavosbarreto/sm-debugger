@@ -25,11 +25,6 @@ include("cmake/cmake-version4git.cmake")
 PROJECT_VERSION_FROM_GIT()
 add_definitions(${PROJECT_VERSION4GIT_CFLAGS})
 
-# Compiler specific jobs #
-if(NOT CMAKE_SIZEOF_VOID_P EQUAL 4)
-    message(FATAL_ERROR "Arch must be 32-bit")
-endif()
-
 find_package(ZLIB REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 
@@ -78,5 +73,6 @@ target_include_directories(${OUTPUT_NAME} PUBLIC "dep/certify/include")
 target_include_directories(${OUTPUT_NAME} PUBLIC "src/sourcepawn/include")
 target_include_directories(${OUTPUT_NAME} PUBLIC "src/sourcepawn/vm")
 target_include_directories(${OUTPUT_NAME} PUBLIC "dep/sourcemod/public/amtl")
+target_include_directories(${OUTPUT_NAME} PUBLIC "dep/cppserver/include")
     
 target_include_directories(${OUTPUT_NAME} PUBLIC ${ZLIB_INCLUDE_DIR})
