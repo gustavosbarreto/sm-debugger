@@ -2,6 +2,7 @@
   "name": "sourcepawn-debugger",
   "version-string": "0.1.0",
   "dependencies": [
+    "vcpkg",
     "nlohmann-json",
     "fmt",
     "zlib"
